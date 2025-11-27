@@ -1,27 +1,31 @@
 {
+  # std+lib
   lib,
   stdenv,
+  # fetcher(s)
   fetchurl,
+  # build helper(s)
   makeDesktopItem,
+  # dependencies
   p7zip,
   wine,
 }:
-stdenv.mkDerivation {
+stdenv.mkDerivation (finalAttrs: {
   pname = "Voices of the Void";
-  version = "0.9.0b_0004";
+  version = "a09b_0004";
   src = fetchurl {
-    url = "https://archive.votv.zip/VDMR/a09b_0004.7z";
+    url = "https://archive.votv.zip/VDMR/${finalAttrs.version}.7z";
     hash = "sha256-hkdCssr4GgNxfzyT0bWjx8ys0p2WgNQsQJR9s3insoM=";
   };
-  buildInputs = [p7zip];
+  buildInputs = [p7zip wine];
 
   buildPhase = ''
     runHook preBuild
 
     echo -e "#!${stdenv.shell}
 
-    WINEPREFIX=\$HOME/.local/share/VotV ${lib.getExe wine}  $out/VotV.exe" > ./votv
-    chmod +x ./votv
+    WINEPREFIX=\$HOME/.local/share/VotV ${lib.getExe wine}  $out/VotV.exe" > ./${finalAttrs.meta.mainProgram}
+    chmod +x ./${finalAttrs.meta.mainProgram}
 
     runHook postBuild
   '';
@@ -30,24 +34,29 @@ stdenv.mkDerivation {
     runHook preInstall
 
     mkdir -p $out
-    cp -r WindowsNoEditor/* $out/
     mkdir -p $out/bin
-    cp ./votv $out/bin/votv
     mkdir -p $out/share
+    # Game files
+    cp -r WindowsNoEditor/* $out/
+    # Start script
+    cp ./${finalAttrs.meta.mainProgram} $out/bin/${finalAttrs.meta.mainProgram}
+    # .desktop file
     ln -s "$desktopItem/share/applications" $out/share/
 
     runHook postInstall
   '';
 
   desktopItem = makeDesktopItem {
-    name = "Voices of the Void";
-    desktopName = "Voices of the Void";
+    name = finalAttrs.meta.mainProgram;
+    desktopName = finalAttrs.pname;
     icon = fetchurl {
       url = "https://votv.dev/assets/body/logo.png";
       hash = "sha256-pEv5DMgCjNNXBvsNf8/hPiFMPeR0fz5OXLsOcBDWWao=";
     };
-    exec = "votv";
+    exec = finalAttrs.meta.mainProgram;
     categories = ["Game"];
+    keywords = [finalAttrs.meta.mainProgram];
+    singleMainWindow = true;
   };
 
   meta = {
@@ -57,4 +66,4 @@ stdenv.mkDerivation {
     platforms = lib.platforms.linux;
     mainProgram = "votv";
   };
-}
+})

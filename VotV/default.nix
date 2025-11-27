@@ -9,7 +9,7 @@
     votv = {
       type = "app";
       program = "${pkgs.lib.getExe self.packages.${pkgs.stdenv.hostPlatform.system}.votv}";
-      meta.description = "An early-access indie horror simulation video game";
+      meta.description = self.packages.${pkgs.stdenv.hostPlatform.system}.votv.meta.description;
     };
   };
 }
