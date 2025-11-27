@@ -11,6 +11,7 @@
   formats,
   treefmt,
   alejandra,
+  mdformat,
 }:
 treefmt-nix.mkWrapper {
   inherit
@@ -19,9 +20,11 @@ treefmt-nix.mkWrapper {
     treefmt
     formats
     alejandra
+    mdformat
     ;
 } {
   programs = {
     alejandra.enable = true;
+    mdformat.enable = true;
   };
 }
